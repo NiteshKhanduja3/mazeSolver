@@ -4,12 +4,14 @@ import argparse
 
 class Graph:
 
+    # Default dict to store Graph
     def __init__(self):
 
         self.graph = defaultdict(list)
         self.edges = {}
         self.prev_vertex = {}
 
+# adding an Edge
     def add_edge(self, u, v, weight=1):
 
         self.graph[u].append(v)
@@ -18,6 +20,7 @@ class Graph:
         self.edges[(u, v)] = weight
         self.edges[(v, u)] = weight
 
+# By using BFS it checkes weatherpath exist in node or not
     def isConnected(self, u, v):
 
         visted = {}
@@ -40,51 +43,48 @@ class Graph:
             return True
         return False
 
+# Using Dijkastra Finding the shortest path Using source and destination
     def dijkstra(self, node):
-
         dist = {}
-        visted = {}
-
+        vetx = {}
         for i in self.graph:
             if i == node:
                 dist[(node, i)] = 0
             else:
-                dist[(node, i)] = 10*10
-
+                dist[(node, i)] = 10**9
         for i in self.graph:
-            visted[i] = False
-
+            vetx[i] = False
         temp = node
-
-        while visted[temp] is False:
-            visted[temp] = True
+        while vetx[temp] is False:
+            vetx[temp] = True
             for i in self.graph[temp]:
-                if (visted[i] is False
+                if (vetx[i] is False
                     and dist[(node, i)] > self.edges[(temp, i)]
                         + dist[(node, temp)]):
                     dist[(node, i)] = self.edges[(temp, i)]
                     + dist[(node, temp)]
                     self.prev_vertex[i] = temp
-
             temp_dict = {}
             for i in self.graph[temp]:
                 temp_dict[i] = dist[(node, i)]
             temp_dict = sorted(temp_dict.items(),
                                key=lambda kv: (kv[1], kv[0]))
             for i in range(len(temp_dict)):
-                if visted[temp_dict[i][0]] is False:
+                if vetx[temp_dict[i][0]] is False:
                     temp = temp_dict[i][0]
                     break
             else:
-                if visted[self.prev_vertex[temp]] is False:
+                if vetx[self.prev_vertex[temp]] is False:
                     temp = self.prev_vertex[temp]
                 else:
                     min_dist = 10**9
                     for i in self.graph:
-                        if visted[i] is False and dist[(node, i)] < min_dist:
+                        if vetx[i] is False and dist[(node, i)] < min_dist:
                             temp = i
                             break
         return self.prev_vertex
+
+# Finding privious vertexset from source to destination
 
     def src_to_dest(self, u, v):
 
@@ -136,6 +136,8 @@ file1 = open(arg.op_file, 'w')
 
 order = len(inArr)
 
+# Adding edges Between the conneted nodes
+
 for i in range(len(inArr)):
     for j in range(len(inArr[0])):
         if j-1 >= 0 and inArr[i][j-1] == 1 and inArr[i][j] == 1:
@@ -143,10 +145,25 @@ for i in range(len(inArr)):
         if i-1 >= 0 and inArr[i-1][j] == 1 and inArr[i][j] == 1:
             g.add_edge((i-1, j), (i, j))
 
-temp_list = g.src_to_dest(
-    tuple(map(int, arg.s.split(','))), tuple(map(int, arg.d.split(','))))
+a = arg.s
+b = arg.d
+if a is None:
+    a = (0, 0)
+else:
+    a = tuple(map(int, a.split(',')))
+if b is None:
+    b = (len(inArr)-1, len(inArr[0])-1)
+else:
+    b = tuple(map(int, b.split(',')))
+
+
+temp_list = g.src_to_dest(a, b)
 
 output_list = [[0 for i in range(len(inArr[0]))] for j in range(len(inArr))]
+
+# Representing the set output obtained from source to destination function
+# In matrix form
+
 if temp_list == -1:
     output = -1
     file1.write(f' {int(output)} ')
